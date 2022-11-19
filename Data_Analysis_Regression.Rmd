@@ -1,0 +1,613 @@
+---
+title: "Midterm_Stat4310"
+author: "Regis Ouedraogo"
+date: "10/13/2022"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+Problem 1
+```{r}
+
+years<- c(1976,1977,1978,1979,1980,1981,1982,1983,1984,1985,1986,1987,1988,1989,1990,1991)
+index<-  c(16.7,17.1,18.2,18.1,17.2,18.2,16.0,17.2,18.0,17.2,16.9,17.1,18.2,17.3,17.5,16.6)
+days <- c(91,105,106,108,91,58,82,65,61,48,61,43,36)
+
+data <- cbind(years,days,index)
+data <- data.frame(data)
+data
+attach(data)
+```
+
+Scatterplot
+
+```{r}
+plot(data$days, data$index, pch=16)
+
+```
+
+```{r}
+pairs(data)
+
+```
+Lets build a linear model
+
+```{r}
+model <- lm(index ~ days, data = data)
+summary(model)
+```
+
+```{r}
+
+# fitted values; prediction bands
+names(model)
+fitted <- model$fitted.values
+fitted
+
+attach(data)
+plot(data$days, data$index,pch=16)
+abline(a=17.631265 , b= -0.003380, col="red")
+
+```
+
+```{r}
+anova(model)
+```
+
+
+
+```{r}
+cooks <- cooks.distance(model)
+summary(cooks)
+```
+
+```{r}
+plot(cooks, pch="*", cex=2)
+abline(h = mean(cooks, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooks)+1, y=cooks, labels=ifelse(cooks>mean(cooks, na.rm=T),names(cooks),""), col="red")
+```
+
+```{r}
+boxplot(cooks)
+```
+```{r}
+
+# Build new model on new data frame
+data <- data[ -c(3,4,7,6,13,15,9,14,1), ] #take out data points
+model2<- lm(index ~ days, data=data)
+summary(model2)
+
+```
+```{r}
+
+cooks <- cooks.distance(model2)
+summary(cooks)
+```
+```{r}
+
+plot(cooks, pch="*", cex=2)
+abline(h = mean(cooks, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooks)+1, y=cooks, labels=ifelse(cooks>mean(cooks, na.rm=T),names(cooks),""), col="red")
+```
+```{r}
+
+prediction <- predict(model2, newdata=data.frame(data$days), se=T)
+prediction
+```
+
+Build an upper and lower bounds for prediction
+
+```{r}
+ #Prediction and Prediction bands
+
+ #fitted values; prediction bands
+
+fitted <- model$fitted.values
+fitted
+
+upper<- fitted +abs( qt(.025, 16))*prediction$se.fit
+lower<- fitted -abs( qt(.025, 16))*prediction$se.fit
+lower
+upper
+```
+
+Problem 2
+
+```{r}
+library(readxl)
+data <- read_excel("data-prob-2-18.xls")
+attach(data)
+colnames(data)[2] ="budget"
+colnames(data)[3] ="impressions"
+data
+```
+
+Lets fit the linear model
+```{r}
+model <- lm(impressions ~ budget ,data = data)
+summary(model)
+
+```
+
+
+P-value (0.001389) < 0.05, Reject H0. there is a significant relationship between the amount that a company spends on advertising and retained impressions
+
+
+
+
+```{r}
+fitted <- model$fitted.values
+fitted
+
+upper<- fitted +abs( qt(.025, 21))*prediction$se.fit
+lower<- fitted -abs( qt(.025, 21))*prediction$se.fit
+
+upper
+lower
+```
+
+
+Lets plot the residuals
+
+```{r}
+model_res <- model$residuals
+plot(model_res, data$impressions, pch=16, ylab = "Residuals", xlab = "impressions", main = "impressions Vs budget")
+abline(0,0)
+```
+
+
+There are few influenced variables having high variance with the mean line.
+
+d) 95% confidence interval for coefficient(Slope):
+
+
+```{r}
+#ges("Rmisc")
+library(Rmisc)
+CI(data$MCI, ci=0.95)
+
+```
+
+
+Problem 3.7:
+
+
+```{r}
+#install.packages("MPV")
+library(MPV)
+data(table.b4)
+attach(table.b4)
+model <- lm(y ~ x1 + x2 + x3 + x4 + x5 + x6 + x7 + x8 + x9, table.b4)
+summary(model)
+data
+```
+```{r}
+plot(model)
+```
+
+
+
+```{r}
+pairs(table.b4)
+```
+
+
+```{r}
+tstat_x1 <- coef(summary(model))[2,1]/coef(summary(model))[2,2]
+tstat_x1
+2*(1-pt(tstat_x1, 14))
+
+tstat_x2 <- coef(summary(model))[3,1]/coef(summary(model))[3,2]
+tstat_x2
+2*(1-pt(tstat_x2, 14))
+
+
+tstat_x3 <- coef(summary(model))[4,1]/coef(summary(model))[4,2]
+tstat_x3
+2*(1-pt(tstat_x3, 14))
+
+
+tstat_x4 <- coef(summary(model))[5,1]/coef(summary(model))[5,2]
+tstat_x4
+2*(1-pt(tstat_x4, 14))
+
+
+tstat_x5 <- coef(summary(model))[6,1]/coef(summary(model))[6,2]
+tstat_x5
+2*(1-pt(tstat_x5, 14))
+
+
+tstat_x6 <- coef(summary(model))[7,1]/coef(summary(model))[7,2]
+tstat_x6
+2*(1-pt(tstat_x6, 14))
+
+
+tstat_x7 <- coef(summary(model))[8,1]/coef(summary(model))[8,2]
+tstat_x7
+2*(1-pt(tstat_x7, 14))
+
+
+tstat_x8 <- coef(summary(model))[9,1]/coef(summary(model))[9,2]
+tstat_x8
+2*(1-pt(tstat_x8, 14))
+
+tstat_x9 <- coef(summary(model))[10,1]/coef(summary(model))[10,2]
+tstat_x9
+2*(1-pt(tstat_x9, 14))
+
+
+
+```
+coef(summary(model))[2,2]
+
+
+```{r}
+anova(model)
+summary(model)
+```
+
+Lets check for multicollinearity
+
+```{r}
+#install.packages("car")
+#library(car)
+
+#vif(model)
+```
+As a rule of thumb, a vif score over 5 is a problem. So we should consider dropping the problematic variable from the regression model.
+
+
+Problem 3.15
+
+FROM TABLE B15
+
+```{r}
+data <- read_excel("data-table-B-15.xls")
+head(data)
+```
+```{r}
+names(data)
+model <- lm(data$MORT ~ data$PRECIP + 
+              data$EDUC + data$NONWHITE + 
+              data$NOX + data$SO2)
+summary(model)
+plot(model)
+```
+
+```{r}
+
+cooks <- cooks.distance(model)
+summary(cooks)
+```
+
+```{r}
+plot(cooks, pch="*", cex=2)
+abline(h = mean(cooks, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooks)+1, y=cooks, labels=ifelse(cooks>mean(cooks, na.rm=T),names(cooks),""), col="red")
+```
+
+```{r}
+
+# Build new model on new data frame
+data <- data[ -c(1,2,6,8,20,50,51,53,58,60,4), ] #take out data points
+model2<- lm(data$MORT ~ data$PRECIP + 
+              data$EDUC + data$NONWHITE + 
+              data$NOX + data$SO2)
+summary(model2)
+plot(model2)
+summary(model2)
+```
+
+
+```{r}
+cooks <- cooks.distance(model2)
+summary(cooks)
+```
+
+```{r}
+
+plot(cooks, pch="*", cex=2)
+abline(h = mean(cooks, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooks)+1, y=cooks, labels=ifelse(cooks>mean(cooks, na.rm=T),names(cooks),""), col="red")
+```
+```{r}
+
+# Build new model on new data frame
+data <- data[ -c(1,2,6,8,20,50,51,53,58,60,4,21,28,
+                 1,32,33,38,44,3,14), ] #take out data points
+model3<- lm(data$MORT ~ data$PRECIP + 
+              data$EDUC + data$NONWHITE + 
+              data$NOX + data$SO2)
+summary(model3)
+plot(model3)
+summary(model3)
+```
+
+
+Multiple R-squared:  0.8684
+Therefore the model is performing a lot better
+
+
+Lets calculate T-test for each regressor:
+
+```{r}
+
+tstat_precip <- coef(summary(model))[2,1]/coef(summary(model))[2,2]
+tstat_precip
+2*(1-pt(tstat_precip, 29))
+
+tstat_educ <- coef(summary(model))[3,1]/coef(summary(model))[3,2]
+tstat_educ
+2*(1-pt(tstat_educ, 29))
+
+
+tstat_nonwhite <- coef(summary(model))[4,1]/coef(summary(model))[4,2]
+tstat_nonwhite
+2*(1-pt(tstat_nonwhite, 29))
+
+
+tstat_nox <- coef(summary(model))[5,1]/coef(summary(model))[5,2]
+tstat_nox
+2*(1-pt(tstat_nox, 29))
+
+
+tstat_so2 <- coef(summary(model))[6,1]/coef(summary(model))[6,2]
+tstat_so2
+2*(1-pt(tstat_so2, 29))
+
+```
+```{r}
+ # adjusted R²
+ summary(model)$adj.r.squared
+
+ # R²
+ summary(model)$r.squared
+```
+
+95% CI for model regressor "S02"
+
+```{r}
+
+SO2_CI <- confint(model, 'data$SO2', level=0.95)
+SO2_CI
+```
+
+
+PROBLEM 4.5
+
+```{r}
+library(readxl)
+data<- read_excel("data-table-B4.XLS")
+head(data)
+
+```
+
+
+```{r}
+#Lets check the data structure
+
+str(data)
+
+#lets fit the model 
+
+model =lm(y~.,data=data)
+summary(model)
+
+#Lets find the optimum regression equation with useful variables only
+model2 =step(lm(y~.,data=data))
+summary(model) 
+
+SSE_Model=sum((model2$residuals)^2) #SSE of the optimal model
+
+plot(model)
+```
+
+```{r}
+par(mfrow = c(1,2))
+plot(residuals(model))
+plot(rstandard(model))
+```
+
+
+```{r}
+model <- lm(y~x1+sqrt(x2)+log(x3)+log(x4)+sqrt(x5)+log(x6)
+            +sqrt(x7)+log(x8)+sqrt(x9), data)
+summary(model)
+```
+
+
+
+Residual standard error: 0.06682
+Multiple R-squared:  0.9761
+The model is performing a lot better now after the box cox transformation
+
+
+
+
+
+PROBLEM 5.10
+                        **** TABLE B9 ****
+                        
+```{r}
+data <- read_excel("data-table-B9.XLS")
+
+head(data)
+```
+
+Lets check the regression model
+
+```{r}
+attach(data)
+model=lm(y ~ ., data = data) # regression model
+summary(model)
+```
+
+
+
+Lets perform a box cox
+```{r}
+library(MASS)
+bc=boxcox(model, lambda=seq(-1.0, 1.0, .1), plotit=TRUE) # Box cox
+```
+
+Cooks distance for outliers analysis
+
+```{r}
+
+cooks <- cooks.distance(model)
+summary(cooks)
+```
+
+```{r}
+
+
+plot(cooks, pch="*", cex=2)
+abline(h = mean(cooks, na.rm=T), col="red")  # add cutoff line
+text(x=1:length(cooks)+1, y=cooks, labels=ifelse(cooks>mean(cooks, na.rm=T),names(cooks),""), col="red")
+```
+
+
+ #take out data points
+```{r}
+# Build new model on new data frame
+data <- data[ -c(1,2,4,9,10,12,23,24,25,35,49,48,47,60,52,37,54,53,61,62,56), ]
+model2<- lm(y ~ ., data = data)
+summary(model2)
+
+plot(model2)
+summary(model2)
+```
+
+LETS PERFORM ANOTHER BOX COX ON NEW SUBSET
+
+```{r}
+bc=boxcox(model2, lambda=seq(-1.0, 1.0, .1), plotit=TRUE) # Box cox
+
+```
+
+Model is performing a lot better
+                      
+
+Lets check for residuals
+
+```{r}
+qqnorm(model2$residuals)
+qqline(model2$residuals)
+```
+
+
+
+Problem 5.21
+
+
+```{r}
+mix_Rate <- c(150, 175 ,200, 225 ,3129, 3200, 2800, 2600)
+Tensile_Strength <- c(3000, 3065, 3300, 2975, 2900, 2985 ,2700 ,2600 ,3190 ,3150 ,3050 ,2765)
+Tensile_Strength
+```
+
+```{r}
+A=c(3129,3000,3065,3190)
+B=c(3200,3300,2975,3150)
+C=c(2800,2900,2985,3050)
+D=c(2600,2700,2600,2765)
+
+Dt=matrix(c(A,B,C,D),ncol=4,byrow=FALSE)
+Dt
+a=4 # Number of treatments in experiment
+
+Yi.=colSums(Dt)
+Y..=sum(Dt)
+N=length(A)+length(B)+length(C)+length(D) # Total number of observations.
+CT=Y..^2/N # Correction Term
+
+TSS=sum(Dt^2)-CT # Total Sum of square
+TSS
+
+SSTr=(1/4)*sum(Yi.^2)-CT # Sum of square due to treatment
+SSTr
+MSTr=SSTr/(a-1) # Mean Sum of square due to treatment
+
+SSE=TSS-SSTr # Sum of square due to error
+SSE
+MSSE=SSE/(N-a) # Mean Sum of square due to error
+
+Fcal=MSTr/MSSE # F-statistic value
+Fcal
+
+Ftab=qf(0.95,a-1,N-a) # F-tabulated value can chosen from table with appropriate degrees pf freedem
+Ftab
+```
+
+Problem(Polynomial Regression)
+
+[ Dataset 7.18]
+
+
+```{r}
+data <- read_excel("data-prob7-18.xlsx")
+data
+attach(data)
+```
+Lets perform a full quadratic regression
+
+```{r}
+model = lm(y ~ x1+x2+x3+x1^2+x2^2+x3^2, data=data)
+summary(model)
+```
+
+T test for x1 x2 and x3
+
+```{r}
+
+tstat_x1 <- coef(summary(model))[2,1]/coef(summary(model))[2,2]
+tstat_x1
+2*(1-pt(tstat_x1, 22))
+
+tstat_x2 <- coef(summary(model))[3,1]/coef(summary(model))[3,2]
+tstat_x2
+2*(1-pt(tstat_x2, 22))
+
+
+tstat_x3 <- coef(summary(model))[4,1]/coef(summary(model))[4,2]
+tstat_x3
+2*(1-pt(tstat_x3, 22))
+
+
+```
+lets plot residuals
+
+
+```{r}
+qqnorm(model$residuals)
+qqline(model$residuals)
+```
+
+
+
+```{r}
+library(rsm)
+
+## lets convert to integer as RSM function only takes integers
+as.integer(data$x1)
+as.integer(data$x2)
+as.integer(data$x3)
+as.integer(data$y)
+
+tools.rsm <- rsm(y ~ SO(x1,x2,x3), data = data)
+summary(tools.rsm)
+```
+
+```{r}
+canonical(tools.rsm)
+```
+
+```{r}
+xs <- canonical(tools.rsm)$xs
+contour(tools.rsm, ~ x1+x2+x3, image=TRUE, at=xs)
+```
+
